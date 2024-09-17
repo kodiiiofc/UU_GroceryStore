@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Магазин продуктов</string>
+    <string name="menu_exit">Выход</string>
+    <string name="btn_create">Создать магазин</string>
+    <string name="et_name">Название продукта</string>
+    <string name="et_price">Цена</string>
+    <string name="btn_submit">Добавить</string>
+</resources>

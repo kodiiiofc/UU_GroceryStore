@@ -1,12 +1,13 @@
 package com.kodiiiofc.example.grocerystore
 
-import android.graphics.Bitmap
+import java.io.Serializable
 
 class Grocery (
     val name: String,
-    val price: String,
-    val image: Bitmap?
-) {
+    var despription: String,
+    var price: String,
+    var image: String?
+) : Serializable {
 
 
 }

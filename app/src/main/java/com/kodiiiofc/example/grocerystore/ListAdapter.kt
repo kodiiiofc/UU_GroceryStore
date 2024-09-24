@@ -1,6 +1,7 @@
 package com.kodiiiofc.example.grocerystore
 
 import android.content.Context
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +22,8 @@ class ListAdapter(context: Context, groceryList: MutableList<Grocery>) : ArrayAd
         val nameTV = view?.findViewById<TextView>(R.id.tv_name)
         val priceTV = view?.findViewById<TextView>(R.id.tv_price)
 
-        imageViewIV?.setImageBitmap(grocery?.image)
+
+        imageViewIV?.setImageURI(Uri.parse(grocery?.image))
         nameTV?.text = grocery?.name
         priceTV?.text = "${grocery?.price} \u20bd"
 

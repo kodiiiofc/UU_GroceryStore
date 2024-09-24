@@ -1,31 +1,33 @@
 package com.kodiiiofc.example.grocerystore
 
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.AdapterView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import java.io.IOException
 
-class StoreActivity : AppCompatActivity() {
+class StoreActivity : AppCompatActivity(), Removable, Updatable {
 
     private val GALLERY_REQUEST = 302
-    var bitmap: Bitmap? = null
+    var photoUri: Uri? = null
+    val noImageString = "android.resource://com.kodiiiofc.example.grocerystore/drawable/noimage"
+
     var groceryList: MutableList<Grocery> = mutableListOf()
+    var listAdapter: ListAdapter? = null
+    var item: Int? = null
+    var grocery: Grocery? = null
+    var check = true
 
     private lateinit var nameET: EditText
     private lateinit var priceET: EditText
+    private lateinit var descriptionET: EditText
 
     private lateinit var imageInputIV: ImageView
 
@@ -41,6 +43,7 @@ class StoreActivity : AppCompatActivity() {
 
         nameET = findViewById(R.id.et_name)
         priceET = findViewById(R.id.et_price)
+        descriptionET = findViewById(R.id.et_description)
 
         imageInputIV = findViewById(R.id.iv_image_input)
 
@@ -48,7 +51,7 @@ class StoreActivity : AppCompatActivity() {
 
         groceriesLV = findViewById(R.id.lv_groceries)
 
-        val listAdapter = ListAdapter(this, groceryList)
+        listAdapter = ListAdapter(this, groceryList)
         groceriesLV.adapter = listAdapter
 
         toolbar = findViewById(R.id.toolbar)
@@ -61,19 +64,30 @@ class StoreActivity : AppCompatActivity() {
         }
 
         submitBTN.setOnClickListener {
-            val name = nameET.text.toString()
+            val name = nameET.text.toString().trim()
             val price = priceET.text.toString()
-            val image = bitmap
+            val description = descriptionET.text.toString().trim()
+            val image = if (photoUri == null) noImageString else photoUri.toString()
 
-            val grocery = Grocery(name, price, image)
-
+            val grocery = Grocery(name, description, price, image)
             groceryList.add(grocery)
+            listAdapter?.notifyDataSetChanged()
 
-            listAdapter.notifyDataSetChanged()
-
+            photoUri = null
             nameET.text.clear()
+            descriptionET.text.clear()
             priceET.text.clear()
             imageInputIV.setImageResource(R.drawable.noimage)
+        }
+
+        groceriesLV.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
+            grocery = listAdapter!!.getItem(position)
+            item = position
+            val dialog = MyAlertDialog()
+            val args = Bundle()
+            args.putSerializable("grocery", grocery)
+            dialog.arguments = args
+            dialog.show(supportFragmentManager, "custom")
         }
 
     }
@@ -100,16 +114,24 @@ class StoreActivity : AppCompatActivity() {
         when (requestCode) {
             GALLERY_REQUEST -> {
                 if (resultCode === RESULT_OK) {
-                    val selectedImage: Uri? = data?.data
-                    try {
-                        bitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedImage)
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                    }
-                    imageInputIV.setImageBitmap(bitmap)
+                    photoUri = data?.data
+                    imageInputIV.setImageURI(photoUri)
                 }
             }
         }
+    }
+
+    override fun remove(grocery: Grocery) {
+        listAdapter?.remove(grocery)
+    }
+
+    override fun update(grocery: Grocery) {
+        val intent = Intent(this, DetailsActivity::class.java)
+        intent.putExtra("grocery", grocery)
+        intent.putExtra("list", groceryList as ArrayList<Grocery>)
+        intent.putExtra("position", item)
+        intent.putExtra("check", check)
+        startActivity(intent)
     }
 
 }

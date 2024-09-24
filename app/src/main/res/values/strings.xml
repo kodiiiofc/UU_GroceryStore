@@ -5,4 +5,8 @@
     <string name="et_name">Название продукта</string>
     <string name="et_price">Цена</string>
     <string name="btn_submit">Добавить</string>
+    <string name="et_description">Краткое описание</string>
+    <string name="tv_name">Название:</string>
+    <string name="tv_price">Цена:</string>
+    <string name="tv_description">Описание:</string>
 </resources>

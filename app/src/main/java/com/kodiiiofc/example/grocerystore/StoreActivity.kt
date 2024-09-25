@@ -1,5 +1,6 @@
 package com.kodiiiofc.example.grocerystore
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -11,11 +12,15 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import kotlin.math.E
 
 class StoreActivity : AppCompatActivity(), Removable, Updatable {
 
     private val GALLERY_REQUEST = 302
+    private val EDIT_REQUEST = 303
+
     var photoUri: Uri? = null
     val noImageString = "android.resource://com.kodiiiofc.example.grocerystore/drawable/noimage"
 
@@ -23,7 +28,6 @@ class StoreActivity : AppCompatActivity(), Removable, Updatable {
     var listAdapter: ListAdapter? = null
     var item: Int? = null
     var grocery: Grocery? = null
-    var check = true
 
     private lateinit var nameET: EditText
     private lateinit var priceET: EditText
@@ -125,13 +129,26 @@ class StoreActivity : AppCompatActivity(), Removable, Updatable {
         listAdapter?.remove(grocery)
     }
 
+    private val launchDetailsActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {result ->
+
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            groceryList = data?.extras?.getSerializable("list") as MutableList<Grocery>
+
+            listAdapter = ListAdapter(this, groceryList)
+            groceriesLV.adapter = listAdapter
+
+        }
+
+    }
+
     override fun update(grocery: Grocery) {
         val intent = Intent(this, DetailsActivity::class.java)
         intent.putExtra("grocery", grocery)
         intent.putExtra("list", groceryList as ArrayList<Grocery>)
         intent.putExtra("position", item)
-        intent.putExtra("check", check)
-        startActivity(intent)
+
+        launchDetailsActivity.launch(intent)
     }
 
 }
